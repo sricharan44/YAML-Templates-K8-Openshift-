@@ -1,0 +1,30 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: claim-postgres
+  namespace: sonarqube
+  labels:
+    region: us-south
+    zone: dal13
+  annotations:
+    ibm.io/provisioning-status: complete
+    pv.kubernetes.io/bind-completed: 'yes'
+    pv.kubernetes.io/bound-by-controller: 'yes'
+    volume.beta.kubernetes.io/storage-provisioner: ibm.io/ibmc-file
+  finalizers:
+    - kubernetes.io/pvc-protection
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+  volumeName: xxx
+  storageClassName: ibmc-file-bronze
+  volumeMode: Filesystem
+status:
+  phase: Bound
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 20Gi

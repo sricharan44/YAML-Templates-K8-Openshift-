@@ -1,0 +1,41 @@
+On using HELM Charts to deploy Sonarqube in K8 cluster - Need to configure scanner to run in 
+------------------------------------------
+Latest SonarQube HELM Charts
+helm install sonarqube oteemocharts/sonarqube -n sonarqube
+------------------------------------------
+# Customization Made based on this link for SonarQube sonartest
+
+https://dev.to/letsmeetphil/local-sonarqube-7-9-1-community-lts-on-kubernetes-38d9
+https://gitlab.com/afireinside/kubernetes-sonarqube/-/tree/master
+
+
+      initContainers:
+        - name: sysctl
+          image: busybox
+          command:
+            - sysctl
+            - '-w'
+            - vm.max_map_count=262144
+
+spec:
+      initContainers:
+        - name: sysctl
+          image: busybox
+          command:
+            - sysctl
+            - '-w'
+            - >-
+              mkdir -p $(printf "/opt/sonarqube/${1-%s\n}" temp logs data
+              extensions/downloads extensions/plugins/tmp extensions/plugins
+              certs) && chown 999:999 -R $(printf "/opt/sonarqube/${1-%s\n}"
+              temp logs data extensions/downloads extensions/plugins/tmp
+              extensions/plugins certs)
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+
+------------------------------------------
+            

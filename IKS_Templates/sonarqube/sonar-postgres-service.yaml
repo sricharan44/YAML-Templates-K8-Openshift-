@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: sonar-postgres
+  namespace: sonarqube
+spec:
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  selector:
+    name: sonar-postgres
+  clusterIP: x.x.x.x
+  type: ClusterIP
+  sessionAffinity: None
+status:
+  loadBalancer: {}
