@@ -1,0 +1,43 @@
+EFK Setup - Seperate Installation EFK using HELM
+
+kubectl create namespace logs
+
+helm repo add stable https://kubernetes-charts.storage.googleapis.com
+
+helm install elasticsearch stable/elasticsearch --namespace=logs \
+--set client.replicas=1 \
+--set master.replicas=1 \
+--set cluster.env.MINIMUM_MASTER_NODES=1 \
+--set cluster.env.RECOVER_AFTER_MASTER_NODES=1 \
+--set cluster.env.EXPECTED_MASTER_NODES=1 \
+--set data.replicas=1 \
+--set data.heapSize=300m
+
+helm install elasticsearch stable/elasticsearch --namespace=logs --set client.replicas=1 --set master.replicas=1 --set cluster.env.MINIMUM_MASTER_NODES=1 --set cluster.env.RECOVER_AFTER_MASTER_NODES=1 --set cluster.env.EXPECTED_MASTER_NODES=1 --set data.replicas=1 --set data.heapSize=300m
+
+helm install elasticsearch stable/elasticsearch --namespace=logs
+
+helm install fluent-bit stable/fluent-bit --namespace=logs --set backend.type=es --set backend.es.host=elasticsearch-client
+
+helm install kibana stable/kibana --namespace=logs --set env.ELASTICSEARCH_HOSTS=http://elasticsearch-client:9200 --set service.type=NodePort --set service.nodePort=31000
+
+helm install fluentd stable/fluentd --namespace=logs --set --set output.host=elasticsearch-client.logs.svc.cluster.local
+
+kubectl patch svc kubernetes-dashboard --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
+
+------------------------------------------------------------------------------------------------------
+helm repo add akomljen-charts https://raw.githubusercontent.com/komljen/helm-charts/master/charts/
+helm install --name es-operator --namespace logging akomljen-charts/elasticsearch-operator
+
+
+kubectl get pods -n logging
+kubectl get CustomResourceDefinition
+
+helm install --name efk --namespace logging akomljen-charts/efk
+kubectl get cronjob -n logging
+kubectl port-forward efk-kibana-6cf88598b6-xlkv2 5601 -n logging
+
+ 
+
+kubectl delete all --all -n <namespace_name>
+------------------------------------------------------------------------------------------------------

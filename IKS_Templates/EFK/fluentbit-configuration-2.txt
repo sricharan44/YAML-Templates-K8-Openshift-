@@ -1,0 +1,52 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: fluent-bit-config
+  namespace: logs
+  labels:
+    app: fluent-bit
+    chart: fluent-bit-2.8.11
+    heritage: Helm
+    release: fluent-bit
+data:
+  fluent-bit-input.conf: |
+    [INPUT]
+        Name             tail
+        Path             /var/log/sample/app-name.log
+        Parser           app-name
+        Tag              *
+        Refresh_Interval 5
+        Mem_Buf_Limit    5MB
+        Skip_Long_Lines  On
+        
+  fluent-bit-output.conf: |
+
+    [OUTPUT]
+        Name  es
+        Match *
+        Host  elasticsearch-client
+        Port  9200
+        Index sample
+
+
+        
+  fluent-bit-service.conf: |
+    [SERVICE]
+        Flush        1
+        Daemon       Off
+        Log_Level    info
+        Parsers_File parsers.conf
+        Parsers_File parsers_custom.conf
+  fluent-bit.conf: |
+    @INCLUDE fluent-bit-service.conf
+    @INCLUDE fluent-bit-input.conf
+    @INCLUDE fluent-bit-filter.conf
+    @INCLUDE fluent-bit-output.conf
+  parsers.conf: |
+    [PARSER]
+        Name        app-name
+        Format      regex
+        Regex       ^\[(?<time>[^\]]*)\] (?<logtype>[^ ]*) \[(?<fnname>[^:]*):(?<linenumber>[^ ]*)\] (?<PID>[^ ]*) (?<logmsg>.*)$
+        Time_Key    time
+        Time_Format %b %d %H:%M:%S        
+  parsers_custom.conf: ''
