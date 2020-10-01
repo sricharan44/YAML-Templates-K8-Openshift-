@@ -1,0 +1,33 @@
+----------------------------------------------------------
+# Basic COS Template Used
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: helloworld-pvc
+  namespace: logs
+  annotations:
+    ibm.io/auto-create-bucket: "false"
+    ibm.io/auto-delete-bucket: "false"
+    ibm.io/bucket: "cos-test-test-bucket"
+    ibm.io/secret-name: cos-read-write-access
+    ibm.io/endpoint: "https://control.cloud-object-storage.cloud.ibm.com/v2/endpoints"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: ibmc-s3fs-flex-regional
+  volumeMode: Filesystem
+
+----------------------------------------------------------
+# Basic COS Secret Template Used
+kind: Secret
+apiVersion: v1
+metadata:
+  name: cos-read-write-access
+  namespace: logs
+data:
+  api-key: #api-key
+  service-instance-id: #instance-id
+type: ibm/ibmc-s3fs
