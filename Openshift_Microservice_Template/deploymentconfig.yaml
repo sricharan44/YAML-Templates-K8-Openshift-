@@ -1,0 +1,70 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewApp
+  labels:
+    app: app-listener-test #app-name
+  name: app-listener-test #app-name
+  namespace: app-listener #project-name
+spec:
+  replicas: 1
+  selector:
+    app: app-listener-test
+    deploymentconfig: app-listener-test
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftNewApp
+      creationTimestamp: null
+      labels:
+        app: app-listener-test
+        deploymentconfig: app-listener-test
+    spec:
+      containers:
+        - image: >-
+            // Picks up the Image Registry from OCR - comment out
+          imagePullPolicy: Always
+          name: app-listener-container
+          ports:
+            - containerPort: 9006
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /code/logs
+              name: app-listener-logs # map mount path to a folder as required
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: #secrets
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: app-listener-logs
+          persistentVolumeClaim:
+            claimName: app-listener-logs # create a Pv/PV Claim and map it to the Volume mount path
+  test: false
+  triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - app-listener-container
+        from:
+          kind: ImageStreamTag
+          name: 'app-listener-test:1.0.0' # Maintain Image name and versioning here
+          namespace: app-listener
+      type: ImageChange
+    - type: ConfigChange

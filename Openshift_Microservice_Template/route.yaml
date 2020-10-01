@@ -1,0 +1,22 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: 'true'
+  labels:
+    app: app-name
+  name: app-name
+  namespace: app-listener
+spec:
+  # configure the hostname to URL reqd . DO it via Dashboard easier and make sure YAML is of these kinda values
+  host: >-
+    <hostname>.<domain>
+  port:
+    targetPort: 9006-tcp # target port name tag - connection type
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: app-listener-test
+    weight: 100
+  wildcardPolicy: None
