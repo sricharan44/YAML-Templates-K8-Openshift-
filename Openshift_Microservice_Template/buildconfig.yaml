@@ -1,0 +1,28 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: app-name
+  namespace: project-name
+spec:
+  failedBuildsHistoryLimit: 2
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'app-name:latest' # maintain versioning based on the requirement
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      ref: bluemix-test
+      uri: 'https://github.com/<project-url>' # add Project URL
+    sourceSecret:
+      name: b2b-github #add secret here to github
+    type: Git
+  strategy:
+    dockerStrategy:
+      dockerfilePath: Dockerfile # mentoin path if any changes made
+    type: Docker
+  successfulBuildsHistoryLimit: 3
+  triggers: []
