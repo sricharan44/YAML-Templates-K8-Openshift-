@@ -1,0 +1,48 @@
+Notes on Setting up Volumes in Kubernetes/OpenShift and common Troubleshooting Notes
+
+Is the init container failing? Because OpenShift sets restricted security context constraints, you might see an error such as chown: /opt/ibm-ucd/server/ext_lib: Operation not permitted. For your deployment, use an SCC that allows chown operations and try again.
+
+"securityContext": 
+{
+  "privileged": true
+}
+
+oc adm policy add-scc-to-user privileged -z default -n efk
+https://stackoverflow.com/questions/48646617/openshift-applying-runonlyas-scc-to-pods-within-a-deployment
+
+https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_scc
+
+volumeMounts:
+    - name: app
+          mountPath: /code/logs
+      volumes:
+      - name: pv-name
+        persistentVolumeClaim:
+          claimName: pvc-names
+
+securityContext:
+        runAsUser: 99
+        fsGroup: 99
+        supplementalGroups: [99]
+
+
+https://serverfault.com/questions/906083/how-to-mount-volume-with-specific-uid-in-kubernetes-pod
+initContainers:
+- name: initcontainer # Or replace the name
+  image: alpine:latest
+  command: ["/bin/sh", "-c"]
+  args:
+    - chown 0:0 /mount; # Replace UID and GID with values from the Dockerfile
+  volumeMounts:
+  - name: app1-volume # Or you can replace with any name
+    mountPath: /mount # Must match the mount path in the args line
+
+initContainers:
+- name: initcontainer # Or replace the name
+  image: alpine:latest
+  command: ["/bin/sh", "-c"]
+  args:
+    - chown 100022000:0 /code/logs; # Replace UID and GID with values from the Dockerfile
+  volumeMounts:
+  - name: pvc-name # Or you can replace with any name
+    mountPath: /code/logs # Must match the mount path in the args line
